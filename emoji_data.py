@@ -54,8 +54,8 @@ def read_csv(csvpath):
 
 
 class EmojiData(Dataset):
-    def __init__(self, anno, split, csvpath='data/multi_class.csv'):
-        pbmc, pbml, abmc, emojis = read_csv(csvpath)
+    def __init__(self, anno, split):
+        pbmc, pbml, abmc, emojis = read_csv('data/multi_class.csv')
         self.anno = anno
         if anno == 'PBMC':
             self.data = pbmc[split]

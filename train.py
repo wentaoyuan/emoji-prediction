@@ -1,5 +1,8 @@
 from data_utils import MultiTaskDataset, DistMultiTaskBatchSampler, collate
 from emoji_data import EmojiData
+from gyafc_data import GYAFCData
+from meld_data import MELDData
+from sst_data import SSTData
 from model import BertMultiTask, get_loss
 from tensorboardX import SummaryWriter
 from time import time
@@ -14,7 +17,15 @@ import torch.multiprocessing as mp
 
 
 def get_data(task_id, split):
-    if task_id == 4:
+    if task_id == 0:
+        return SSTData(split)
+    elif task_id == 1:
+        return GYAFCData(split)
+    elif task_id == 2:
+        return MELDData(split)
+    elif task_id == 3:
+        return MELDData(split, dyadic=True)
+    elif task_id == 4:
         return EmojiData('PBMC', split)
     elif task_id == 5:
         return EmojiData('PBML', split)
@@ -90,7 +101,8 @@ def train(rank, world_size, args):
 
     optimizer = torch.optim.Adamax(model.parameters(), args.lr)
 
-    writer = SummaryWriter(args.log_dir)
+    if rank == 0:
+        writer = SummaryWriter(args.log_dir)
 
     for epoch in range(args.n_epoch):
         model.train()
@@ -152,7 +164,7 @@ def train(rank, world_size, args):
         fp = [torch.zeros(get_n_classes(t)).cuda() for t in args.tasks]
         fn = [torch.zeros(get_n_classes(t)).cuda() for t in args.tasks]
         start = time()
-        for inputs, labels, task_id in enumerate(dev_loader):
+        for inputs, labels, task_id in dev_loader:
             inputs = {key: inputs[key].cuda() for key in inputs}
             labels = labels.cuda()
             data_time += time() - start
