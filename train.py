@@ -66,9 +66,7 @@ def train(rank, world_size, args):
     torch.cuda.set_device(rank)
 
     tokenizer = BertTokenizer.from_pretrained('bert-large-cased')
-    train_data = MultiTaskDataset(
-        [get_data(t, 'train') for t in args.tasks], args.max_length
-    )
+    train_data = MultiTaskDataset([get_data(t, 'train') for t in args.tasks])
     train_sampler = DistMultiTaskBatchSampler(
         train_data, args.batch_size, drop_last=True,
         rank=rank, world_size=world_size
@@ -76,12 +74,10 @@ def train(rank, world_size, args):
     train_loader = DataLoader(
         train_data,
         batch_sampler=train_sampler,
-        collate_fn=lambda x: collate(tokenizer, x),
+        collate_fn=lambda x: collate(tokenizer, x, args.max_length),
         pin_memory=True
     )
-    dev_data = MultiTaskDataset(
-        [get_data(t, 'dev') for t in args.tasks]
-    )
+    dev_data = MultiTaskDataset([get_data(t, 'dev') for t in args.tasks])
     dev_sampler = DistMultiTaskBatchSampler(
         dev_data, args.batch_size, drop_last=False,
         rank=rank, world_size=world_size
