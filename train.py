@@ -100,7 +100,7 @@ def train(rank, world_size, args):
     model = DDP(model, device_ids=[rank], find_unused_parameters=True)
 
     optimizer = torch.optim.Adamax(model.parameters(), args.lr)
-
+    step = 0
     if rank == 0:
         writer = SummaryWriter(args.log_dir)
 
@@ -109,6 +109,7 @@ def train(rank, world_size, args):
         batch_time = data_time = total_loss = 0
         start = time()
         for b, (inputs, labels, task_id) in enumerate(train_loader):
+            step += 1
             inputs = {key: inputs[key].cuda() for key in inputs}
             labels = labels.cuda()
             data_time += time() - start
@@ -141,9 +142,13 @@ def train(rank, world_size, args):
                 for i, t in enumerate(args.tasks):
                     if task[i] > 0:
                         name = get_task_name(t)
-                        writer.add_scalar(f'train/{name}_acc', acc[i] / task[i] * 100)
+                        writer.add_scalar(
+                            f'train/{name}_acc', acc[i] / task[i] * 100, step
+                        )
                         if t == 5:
-                            writer.add_scalar(f'train/{name}_acc_sub', acc_sub / task[i] * 100)
+                            writer.add_scalar(
+                                f'train/{name}_acc_sub', acc_sub / task[i] * 100, step
+                            )
 
                 if (b + 1) % args.print_freq == 0:
                     print(
@@ -206,12 +211,12 @@ def train(rank, world_size, args):
             for i, t in enumerate(args.tasks):
                 name = get_task_name(t)
                 acc = correct[i] / total[i] * 100
-                writer.add_scalar(f'dev/{name}_acc', acc)
+                writer.add_scalar(f'dev/{name}_acc', acc, step)
                 f1 = (tp[i] / (tp[i] + (fp[i] + fn[i]) / 2)).mean() * 100
-                writer.add_scalar(f'dev/{name}_f1', f1)
+                writer.add_scalar(f'dev/{name}_f1', f1, step)
                 if t == 5:
                     acc_sub = all_correct / total[i] * 100
-                    writer.add_scalar(f'dev/{name}_acc_sub', acc_sub)
+                    writer.add_scalar(f'dev/{name}_acc_sub', acc_sub, step)
                     str_out += f'{name} Acc {acc_sub.item():.2f} F1 {f1.item():.2f} '
                 else:
                     str_out += f'{name} Acc {acc.item():.2f} F1 {f1.item():.2f} '

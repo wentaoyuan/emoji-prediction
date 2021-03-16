@@ -11,7 +11,7 @@ def get_loss(task_id):
 
 
 class BertMultiTask(nn.Module):
-    def __init__(self, n_classes, losses):
+    def __init__(self, n_classes, losses=None):
         super(BertMultiTask, self).__init__()
         self.backbone = BertModel.from_pretrained("bert-large-cased")
         for i, n in enumerate(n_classes):

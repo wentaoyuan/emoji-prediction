@@ -9,7 +9,8 @@ class GYAFCData(Dataset):
         self.data = []
         for cat in ['Entertainment_Music', 'Family_Relationships']:
             for l, label in enumerate(['informal', 'formal']):
-                with open(f'data/GYAFC_Corpus/{cat}/{split}/{label}') as f:
+                path = f'data/GYAFC_Corpus/{cat}/{split}/{label}'
+                with open(path, encoding='utf-8') as f:
                     for line in f.readlines():
                         s = line.strip()
                         self.data.append((line.strip(), l))
