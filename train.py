@@ -67,7 +67,7 @@ def train(rank, world_size, args):
 
     tokenizer = BertTokenizer.from_pretrained('bert-large-cased')
     train_data = MultiTaskDataset(
-        [get_data(t, 'train') for t in args.tasks]
+        [get_data(t, 'train') for t in args.tasks], args.max_length
     )
     train_sampler = DistMultiTaskBatchSampler(
         train_data, args.batch_size, drop_last=True,
@@ -237,6 +237,7 @@ if __name__ == '__main__':
     # Training
     parser.add_argument('--log_dir', default='logs/test')
     parser.add_argument('--batch_size', type=int, default=16)
+    parser.add_argument('--max_length', type=int, default=196)
     parser.add_argument('--lr', type=float, default=0.00005)
     parser.add_argument('--n_epoch', type=int, default=7)
     parser.add_argument('--print_freq', type=int, default=100)

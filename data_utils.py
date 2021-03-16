@@ -5,15 +5,20 @@ import torch.distributed as dist
 
 
 class MultiTaskDataset(Dataset):
-    def __init__(self, datasets):
+    def __init__(self, datasets, max_length):
         self.datasets = datasets
+        self.max_length = max_length
     
     def __len__(self):
         return sum([len(d) for d in self.datasets])
     
     def __getitem__(self, idx):
         task_id, sample_id = idx
-        return self.datasets[task_id][sample_id] + (task_id,)
+        text, labels = self.datasets[task_id][sample_id]
+        words = text.split(' ')
+        if len(words) > self.max_length:
+            text = ' '.join(words[torch.randint(len(words)-self.max_length):])
+        return text, labels, task_id
 
 
 class DistMultiTaskBatchSampler(Sampler):
@@ -56,6 +61,13 @@ class DistMultiTaskBatchSampler(Sampler):
 
 
 def collate(tokenizer, batch):
-    text, labels, task_ids = zip(*batch)
+    batch = tuple(zip(*batch))
+    if len(batch) == 3:
+        text, labels, task_ids = batch
+    else:
+        text, labels = batch
     encoded_input = tokenizer(text, padding=True, truncation=True, return_tensors="pt")
-    return encoded_input, torch.stack(labels), task_ids[0]
+    if len(batch) == 3:
+        return encoded_input, torch.stack(labels), task_ids[0]
+    else:
+        return encoded_input, torch.stack(labels)
