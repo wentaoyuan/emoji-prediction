@@ -125,16 +125,16 @@ def train(rank, world_size, args):
             with torch.no_grad():
                 if args.tasks[task_id] == 5:
                     correct = (logits > 0) == labels.bool()
-                    acc[task_id] = correct.float().mean() * 100
-                    acc_sub = correct.all(dim=1).float().mean() * 100
+                    acc[task_id] = correct.float().mean()
+                    acc_sub = correct.all(dim=1).float().mean()
                 else:
-                    acc[task_id] = (logits.argmax(dim=1) == labels).float().mean() * 100
+                    acc[task_id] = (logits.argmax(dim=1) == labels).float().mean()
             dist.reduce(acc, 0)
             dist.reduce(acc_sub, 0)
             dist.reduce(task, 0)
 
             if rank == 0:
-                writer.add_scalar(f'train/loss', loss.item())
+                writer.add_scalar(f'train/loss', loss.item(), step)
                 for i, t in enumerate(args.tasks):
                     if task[i] > 0:
                         name = get_task_name(t)
@@ -233,7 +233,7 @@ if __name__ == '__main__':
     # Training
     parser.add_argument('--log_dir', default='logs/test')
     parser.add_argument('--batch_size', type=int, default=16)
-    parser.add_argument('--max_length', type=int, default=196)
+    parser.add_argument('--max_length', type=int, default=192)
     parser.add_argument('--lr', type=float, default=0.00005)
     parser.add_argument('--n_epoch', type=int, default=7)
     parser.add_argument('--print_freq', type=int, default=100)
