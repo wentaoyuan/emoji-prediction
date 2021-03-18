@@ -30,11 +30,7 @@ class DistMultiTaskBatchSampler(Sampler):
             self.n_batches = [ceil(len(d) / self.batch_size) for d in self.data.datasets]
 
     def __len__(self):
-        n = sum(self.n_batches) // self.world_size
-        r = sum(self.n_batches) % self.world_size
-        if r > 0 and self.rank < r:
-            n += 1
-        return n
+        return sum(self.n_batches) // self.world_size
 
     def __iter__(self):
         batch_ids = torch.arange(sum(self.n_batches)).cuda()
@@ -52,7 +48,8 @@ class DistMultiTaskBatchSampler(Sampler):
                     break
                 ids = s[j:j+self.batch_size].cpu()
                 batches.append(torch.stack([torch.ones(len(ids)).long() * i, ids], dim=1))
-        for i in range(self.rank, sum(self.n_batches), self.world_size):
+        n_batches = sum(self.n_batches) // self.world_size * self.world_size
+        for i in range(self.rank, n_batches, self.world_size):
             yield batches[batch_ids[i]]
 
 
