@@ -16,10 +16,10 @@ As the raw data only provides the label corresponding to each phrase rather than
 The datasets are downloaded from the original website but for convenience, they can be accessed in this [Google Drive folder](https://drive.google.com/drive/folders/1XONpNbPa5mpu6V9WVpkQwNvCD40zRWtn?usp=sharing). Our processing script is in the same directory as the dataset folder and can be directly run to load the dataset and format it into desired Pytorch dataloader class setting. 
 ​
 ### [GYAFC Corpus](https://github.com/raosudha89/GYAFC-corpus)
-We contacted the original author for access of the data but it's also currently available for download in Google drive. Our processing script should be placed in the same directory as the datasets (GYAFC_Corpus) and can be directly run to load the dataset and format it into desired Pytorch dataloader class setting. 
+We contacted the original author for access of the data but it's also currently available for download in [Google Drive folder](https://drive.google.com/drive/folders/1XONpNbPa5mpu6V9WVpkQwNvCD40zRWtn?usp=sharing). Our processing script should be placed in the same directory as the datasets (GYAFC_Corpus) and can be directly run to load the dataset and format it into desired Pytorch dataloader class setting. 
 ​
 ### [Multi-Resolution Emoji Prediction (MREP) Dataset]()
-We contacted the authors of the original paper [1] for access of the dataset through email. The data can be found in `data/multi_class.csv`. `emoji_data.py` provide util functions to load the dataset and format it into a Pytorch `Dataset` class.
+We contacted the authors of the original paper [1] for access of the dataset through email. It's also currently available for download in [Google Drive folder](https://drive.google.com/drive/folders/1XONpNbPa5mpu6V9WVpkQwNvCD40zRWtn?usp=sharing). The data can be found in `Multi-Resolution/multi_class.csv`. The data should be placed in `data/multi_class.csv`.`emoji_data.py` provide util functions to load the dataset and format it into a Pytorch `Dataset` class.
 
 ## Training code + command:
 `train.py` contains code to do distributed multi-GPU fine-tuning of a pretrained `bert-large-cased` model on multiple text classfication datasets. Each dataset has a unique task ID listed below:
